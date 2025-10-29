@@ -262,9 +262,9 @@ export default function DataPreview({
             {pageSize === 'all'
               ? `1–${totalRows}`
               : `${(currentPage - 1) * (pageSize as number) + 1}–${Math.min(
-                currentPage * (pageSize as number),
-                totalRows
-              )}`}{' '}
+                  currentPage * (pageSize as number),
+                  totalRows
+                )}`}{' '}
             of {totalRows}
           </p>
           <div className="flex items-center space-x-3">
