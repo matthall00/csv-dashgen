@@ -1,31 +1,10 @@
+import { useState, useEffect, ReactNode } from 'react'
 import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from 'react'
-
-export interface AppLimits {
-  maxFileSize: number // in bytes
-  maxRows: number
-  maxColumns: number
-  maxCharts: number
-  enableDataPersistence: boolean
-  enableAnalytics: boolean
-}
-
-export interface PrivacySettings {
-  allowDataCollection: boolean
-  allowErrorReporting: boolean
-  allowUsageAnalytics: boolean
-  dataRetentionDays: number
-}
-
-export interface AppConfig {
-  limits: AppLimits
-  privacy: PrivacySettings
-}
+  ConfigContext,
+  AppLimits,
+  PrivacySettings,
+  AppConfig,
+} from './ConfigContext.context'
 
 const DEFAULT_LIMITS: AppLimits = {
   maxFileSize: 50 * 1024 * 1024, // 50MB
@@ -48,42 +27,25 @@ const DEFAULT_CONFIG: AppConfig = {
   privacy: DEFAULT_PRIVACY,
 }
 
-interface ConfigContextType {
-  config: AppConfig
-  updateLimits: (limits: Partial<AppLimits>) => void
-  updatePrivacy: (privacy: Partial<PrivacySettings>) => void
-  resetToDefaults: () => void
-  getCurrentUsage: () => {
-    fileSize: number
-    rowCount: number
-    columnCount: number
-    chartCount: number
-  }
-}
-
-const ConfigContext = createContext<ConfigContextType | undefined>(undefined)
-
 const CONFIG_STORAGE_KEY = 'csv-dashgen-config'
 
 export function ConfigProvider({ children }: { children: ReactNode }) {
-  const [config, setConfig] = useState<AppConfig>(DEFAULT_CONFIG)
-
-  // Load config from localStorage on mount
-  useEffect(() => {
+  const [config, setConfig] = useState<AppConfig>(() => {
     try {
       const stored = localStorage.getItem(CONFIG_STORAGE_KEY)
       if (stored) {
         const parsedConfig = JSON.parse(stored)
         // Merge with defaults to handle new config options
-        setConfig({
+        return {
           limits: { ...DEFAULT_LIMITS, ...parsedConfig.limits },
           privacy: { ...DEFAULT_PRIVACY, ...parsedConfig.privacy },
-        })
+        }
       }
     } catch (error) {
       console.warn('Failed to load config from localStorage:', error)
     }
-  }, [])
+    return DEFAULT_CONFIG
+  })
 
   // Save config to localStorage whenever it changes
   useEffect(() => {
@@ -135,12 +97,4 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
       {children}
     </ConfigContext.Provider>
   )
-}
-
-export function useConfig() {
-  const context = useContext(ConfigContext)
-  if (context === undefined) {
-    throw new Error('useConfig must be used within a ConfigProvider')
-  }
-  return context
 }

@@ -1,14 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
-
-type Theme = 'light' | 'dark' | 'system'
-
-interface ThemeContextType {
-  theme: Theme
-  setTheme: (theme: Theme) => void
-  resolvedTheme: 'light' | 'dark'
-}
-
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
+import React, { useState, useEffect } from 'react'
+import { ThemeContext, Theme } from './ThemeContext.context'
 
 interface ThemeProviderProps {
   children: React.ReactNode
@@ -21,20 +12,18 @@ export function ThemeProvider({
   defaultTheme = 'system',
   storageKey = 'csv-dashgen-theme',
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(defaultTheme)
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light')
-
-  // Load theme from localStorage on mount
-  useEffect(() => {
+  const [theme, setTheme] = useState<Theme>(() => {
     try {
       const stored = localStorage.getItem(storageKey)
       if (stored && ['light', 'dark', 'system'].includes(stored)) {
-        setTheme(stored as Theme)
+        return stored as Theme
       }
     } catch (error) {
       console.warn('Failed to load theme from localStorage:', error)
     }
-  }, [storageKey])
+    return defaultTheme
+  })
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light')
 
   // Update resolved theme when theme changes
   useEffect(() => {
@@ -91,14 +80,4 @@ export function ThemeProvider({
       {children}
     </ThemeContext.Provider>
   )
-}
-
-export function useTheme() {
-  const context = useContext(ThemeContext)
-
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider')
-  }
-
-  return context
 }
