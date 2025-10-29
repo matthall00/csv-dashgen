@@ -50,6 +50,7 @@ export default function DataPreview({
 
   // Reset page when dataset changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1)
   }, [dataset])
 
@@ -189,6 +190,7 @@ export default function DataPreview({
 
   // Keep currentPage in range when pageSize changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage((prev) => {
       const maxPage = totalPages
       return Math.min(prev, maxPage)
@@ -260,9 +262,9 @@ export default function DataPreview({
             {pageSize === 'all'
               ? `1–${totalRows}`
               : `${(currentPage - 1) * (pageSize as number) + 1}–${Math.min(
-                  currentPage * (pageSize as number),
-                  totalRows
-                )}`}{' '}
+                currentPage * (pageSize as number),
+                totalRows
+              )}`}{' '}
             of {totalRows}
           </p>
           <div className="flex items-center space-x-3">
